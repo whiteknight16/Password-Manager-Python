@@ -1,24 +1,44 @@
 from tkinter import *
 from tkinter import messagebox
 import password_generator
+import json
 import pyperclip
-#PASSWORD GENERATOR
+# PASSWORD GENERATOR
+
+
 def generate_password():
-    password_write.delete(0,END)
-    password=password_generator.generate_password()
-    password_write.insert(0,password)
+    password_write.delete(0, END)
+    password = password_generator.generate_password()
+    password_write.insert(0, password)
     pyperclip.copy(password)
 # SAVE PASSWORD
+
+
 def savePassword():
-    if (len(website_write.get())==0 or len(password_write.get())==0 or len(email_write.get())==0 ):
-        messagebox.showerror(title="OOPS!",message="Please don't leave any field empty")
+    new_data = {
+        website_write.get(): {
+            "email": email_write.get(),
+            "password": password_write.get()
+        }
+    }
+    if (len(website_write.get()) == 0 or len(password_write.get()) == 0 or len(email_write.get()) == 0):
+        messagebox.showerror(
+            title="OOPS!", message="Please don't leave any field empty")
 
     elif (messagebox.askokcancel(title="Website", message=f"These are the details entered:\nEmail:{email_write.get()}\nPassword:{password_write.get()}\n Is it Ok to save?")):
-        with open("./data.csv", mode="a") as saveFile:
-            saveFile.write(
-                f"{website_write.get()},{email_write.get()},{password_write.get()}\n")
-            website_write.delete(0, END)
-            password_write.delete(0, END)
+        try:
+            with open("./data.json", "r") as savefile:
+                data = json.load(savefile)
+                data.update(new_data)
+        except FileNotFoundError:
+            with open("./data.json", "w") as savefile:
+                json.dump(new_data, savefile, indent=4)
+
+        else:
+            with open("./data.json", "w") as savefile:
+                json.dump(data, savefile, indent=4)
+                website_write.delete(0, END)
+                password_write.delete(0, END)
 
 # UI SETUP
 
@@ -43,7 +63,7 @@ email.grid(row=2, column=0)
 password.grid(row=3, column=0)
 
 # Setting up buttons
-generate = Button(text="Generate Password",command=generate_password)
+generate = Button(text="Generate Password", command=generate_password)
 add = Button(text="Add", width=36, command=savePassword)
 generate.grid(row=3, column=2)
 add.grid(row=4, column=1, columnspan=2)
