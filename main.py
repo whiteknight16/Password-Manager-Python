@@ -37,8 +37,9 @@ def savePassword():
         else:
             with open("./data.json", "w") as savefile:
                 json.dump(data, savefile, indent=4)
-                website_write.delete(0, END)
-                password_write.delete(0, END)
+        finally:
+            website_write.delete(0, END)
+            password_write.delete(0, END)
 
 # UI SETUP
 
